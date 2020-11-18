@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pequeno Príncipe</title>
+</head>
+
+<body>
+  <div style="position:relative;width:320px;height:480px">
+    <canvas id="game-canvas" width="320" height="480"></canvas>
+    <button id="botaoA" value="A"
+      style="position: absolute;left: 57px;top: 117px;width: 161px;display: none;height: 17px;opacity: 0.1;border: 0px;"></button>
+    <button id="botaoB" value="B"
+      style="position: absolute;left: 57px;top: 136px;width: 161px;display: none;height: 17px;opacity: 0.1;border: 0px;"></button>
+    <button id="botaoC" value="C"
+      style="position: absolute;left: 57px;top: 155px;width: 161px;display: none;height: 17px;opacity: 0.1;border: 0px;"></button>
+  </div>
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      border: 1px solid #000;
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+
+  <script src="./jogo.js"></script>
+</body>
+
+</html>
