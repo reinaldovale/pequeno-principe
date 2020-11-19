@@ -67,9 +67,12 @@ const planoDeFundo = {
       planoDeFundo.largura, planoDeFundo.altura,
     )
 
-    contexto.font = 'normal bold 18px serif'
+    contexto.font = 'normal normal 20px serif'
+    contexto.fillStyle = "white"
+    contexto.fillText("Pontos: ", 200, 20)
+    contexto.font = 'normal bold 30px serif'
     contexto.fillStyle = "red"
-    contexto.fillText(planoDeFundo.recorde, 300, 20)
+    contexto.fillText(planoDeFundo.recorde.toString().padStart(3, '0'), 270, 25)
   },
 }
 
@@ -150,10 +153,12 @@ function criaPergunta() {
       pergunta.botaoB.style.display = 'none'
       pergunta.botaoC.style.display = 'none'
     },
-    resposta(evento) {
-      globais.principe.y = -globais.principe.altura / 2
-      pergunta.esconderBotoes()
-      if (evento.target.value === pergunta.questao.resposta) {
+    click({ target: { tagName, value } }) {
+      if (!/BUTTON/.test(tagName)) {
+        return
+      }
+
+      if (value === pergunta.questao.resposta) {
         console.log("Você ganhou 10 pontos!");
         somPonto.play()
         planoDeFundo.recorde += 10;
@@ -161,7 +166,10 @@ function criaPergunta() {
       else {
         somErro.play()
       }
+
       pergunta.questao = {}
+      globais.principe.y = -globais.principe.altura / 2
+      pergunta.esconderBotoes()
       mudaParaTela(Telas.JOGO)
     },
     atualiza() {
@@ -235,7 +243,7 @@ function criaPlanetario() {
       }
       return false
     },
-    principePodeEntrar(planeta) {
+    estaOPrincipeEmCondicoesDeEntrarNo(planeta) {
       const peDoPrincipe = globais.principe.y + globais.principe.altura
 
       if (globais.principe.x > planeta.x
@@ -259,13 +267,14 @@ function criaPlanetario() {
       planetario.planetas.forEach(function (planeta) {
         planeta.x = planeta.x - 1
 
-        if (planetario.principePodeEntrar(planeta)) {
+        if (planetario.estaOPrincipeEmCondicoesDeEntrarNo(planeta)) {
           console.log('Principe entrou no planeta')
           mudaParaTela(Telas.PERGUNTA)
         }
 
         if (planetario.temColisaoComOPrincipe(planeta)) {
           console.log('Você perdeu!')
+          somGrito.play()
           planoDeFundo.recorde = 0
           mudaParaTela(Telas.INICIO)
         }
@@ -431,7 +440,7 @@ Telas.PERGUNTA = {
     globais.pergunta.desenha()
   },
   click(evento) {
-    globais.pergunta.resposta(evento)
+    globais.pergunta.click(evento)
   },
   atualiza() {
     globais.pergunta.atualiza()
