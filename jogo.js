@@ -1,3 +1,14 @@
+const canvas = document.querySelector('canvas')
+const contexto = canvas.getContext('2d')
+
+const videoIntroducao = './introducao.mp4'
+const video = document.createElement("video");
+video.src = videoIntroducao;
+video.autoplay = true;
+video.loop = false;
+video.muted = false;
+video.addEventListener('ended', evento => mudaParaTela(Telas.JOGO))
+
 let frames = 0
 const somGrito = new Audio()
 somGrito.src = './efeitos/grito.wav'
@@ -11,11 +22,15 @@ somPonto.src = './efeitos/ponto.wav'
 const somErro = new Audio()
 somErro.src = './efeitos/erro.wav'
 
+const somSpaco = new Audio()
+somSpaco.src = './efeitos/spaco.wav'
+somSpaco.loop = true
+
 const sprites = new Image()
 sprites.src = './sprites.png'
 
-const canvas = document.querySelector('canvas')
-const contexto = canvas.getContext('2d')
+const daniel = new Image()
+daniel.src = './daniel.png'
 
 const questoes = [{
   pergunta: "Pegunta de número UM ",
@@ -30,6 +45,45 @@ const questoes = [{
   alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
   resposta: 'C',
 }]
+
+function criaAbertura() {
+  const abertura = {
+    spriteX: 0,
+    spriteY: 0,
+    largura: 320,
+    altura: 480,
+    x: 0,
+    y: 0,
+    recorde: 0,
+    iniciado: false,
+    click() {
+      somSpaco.pause();
+      video.play()
+      if (abertura.iniciado) {
+        video.pause()
+        somSpaco.play()
+        video.currentTime = 100
+      }
+      abertura.iniciado = true
+    },
+
+    desenha() {
+      contexto.font = 'normal bold 20px serif'
+      contexto.fillStyle = "red"
+
+      if (!abertura.iniciado) {
+        contexto.drawImage(daniel, 0, 0)
+        contexto.fillText('Para Começar, clique na Tela', 10, 470)
+      }
+      else {
+        contexto.drawImage(video, 0, 0)
+        contexto.fillText('Introdução', 105, 30)
+        contexto.fillText('Clique para pular', 150, 470)
+      }
+    },
+  }
+  return abertura
+}
 
 // [Plano de Fundo]
 const planoDeFundo = {
@@ -394,8 +448,6 @@ function criaPrincipe() {
   return principe
 }
 
-
-
 // 
 // [Telas]
 // 
@@ -412,18 +464,19 @@ function mudaParaTela(novaTela) {
 const Telas = {
   INICIO: {
     inicializa() {
+      somSpaco.play()
       globais.sol = criaSol()
       globais.principe = criaPrincipe()
       globais.planetario = criaPlanetario()
       globais.pergunta = criaPergunta()
+      globais.abertura = criaAbertura()
     },
     desenha() {
       planoDeFundo.desenha()
-      globais.sol.desenha()
-      globais.principe.desenha()
+      globais.abertura.desenha()
     },
     click() {
-      mudaParaTela(Telas.JOGO)
+      globais.abertura.click()
     },
     atualiza() {
       planoDeFundo.atualiza()
@@ -492,6 +545,7 @@ window.addEventListener('click', function (evento) {
     telaAtiva.click(evento)
   }
 })
+
 
 mudaParaTela(Telas.INICIO)
 loop()
