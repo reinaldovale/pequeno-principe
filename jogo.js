@@ -539,12 +539,25 @@ function loop() {
   requestAnimationFrame(loop)
 }
 
-
-window.addEventListener('click', function (evento) {
+const listenerClick = evento => {
   if (telaAtiva.click) {
     telaAtiva.click(evento)
   }
-})
+};
+const listenerKeyDown = (evento) => {
+  const isSpace = evento.code === 'Space';
+  const isArrowUp = evento.code === 'ArrowUp';
+  const fireJump = isSpace || isArrowUp;
+  if (fireJump) {
+    evento.preventDefault();
+    evento.stopPropagation();
+    telaAtiva.click();
+  }
+}
+
+
+window.addEventListener('click', listenerClick);
+window.addEventListener('keydown', listenerKeyDown);
 
 
 mudaParaTela(Telas.INICIO)
