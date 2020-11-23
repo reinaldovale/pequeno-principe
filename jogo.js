@@ -37,7 +37,7 @@ const questoes = [{
   resposta: 'C',
 }]
 
-const criaVideoIntroducao = (fonte = './introducao.mp4') => {
+const criaIntroducao = (fonte = './introducao.mp4') => {
   const somEspaco = new Audio()
   somEspaco.src = './efeitos/spaco.wav'
   somEspaco.loop = true
@@ -65,9 +65,9 @@ const criaVideoIntroducao = (fonte = './introducao.mp4') => {
   }
 }
 
-const videoIntroducao = criaVideoIntroducao()
+const introducao = criaIntroducao()
 
-const criaAbertura = (contexto, videoIntroducao) => {
+const criaAbertura = (contexto, introducao) => {
   let recorde = 0, iniciado = false
   const spriteX = 0,
     spriteY = 0,
@@ -77,9 +77,9 @@ const criaAbertura = (contexto, videoIntroducao) => {
     y = 0
 
   const click = () => {
-    videoIntroducao.iniciar()
+    introducao.iniciar()
     if (iniciado) {
-      videoIntroducao.parar()
+      introducao.parar()
     }
     iniciado = true
   }
@@ -93,7 +93,7 @@ const criaAbertura = (contexto, videoIntroducao) => {
       contexto.fillText('Para Começar, clique na Tela', 10, 470)
     }
     else {
-      contexto.drawImage(videoIntroducao.video, 0, 0)
+      contexto.drawImage(introducao.video, 0, 0)
       contexto.fillText('Introdução', 105, 30)
       contexto.fillText('Clique para pular', 150, 470)
     }
@@ -491,7 +491,7 @@ const Telas = {
       globais.principe = criaPrincipe()
       globais.planetario = criaPlanetario()
       globais.pergunta = criaPergunta()
-      globais.abertura = criaAbertura(contexto, videoIntroducao)
+      globais.abertura = criaAbertura(contexto, introducao)
     },
     desenha() {
       planoDeFundo.desenha()
