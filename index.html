@@ -7,8 +7,8 @@
   <title>Pequeno Príncipe</title>
 </head>
 
-<body>
-  <div style="position:relative;width:320px;height:480px">
+<body onload="window.PequenoPrincipe(document.querySelector('#root'));">
+  <div id="root" style="position:relative;width:320px;height:480px">
     <canvas id="game-canvas" width="320" height="480"></canvas>
     <button id="botaoA" value="A"
       style="position: absolute;left: 57px;top: 117px;width: 161px;display: none;height: 17px;opacity: 0.1;border: 0px;"></button>

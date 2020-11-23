@@ -1,15 +1,10 @@
 const canvas = document.querySelector('canvas')
 const contexto = canvas.getContext('2d')
 
-const videoIntroducao = './introducao.mp4'
-const video = document.createElement("video");
-video.src = videoIntroducao;
-video.autoplay = true;
-video.loop = false;
-video.muted = false;
-video.addEventListener('ended', evento => mudaParaTela(Telas.JOGO))
-
+const globais = {}
+let telaAtiva = {}
 let frames = 0
+
 const somGrito = new Audio()
 somGrito.src = './efeitos/grito.wav'
 
@@ -21,10 +16,6 @@ somPonto.src = './efeitos/ponto.wav'
 
 const somErro = new Audio()
 somErro.src = './efeitos/erro.wav'
-
-const somSpaco = new Audio()
-somSpaco.src = './efeitos/spaco.wav'
-somSpaco.loop = true
 
 const sprites = new Image()
 sprites.src = './sprites.png'
@@ -46,46 +37,73 @@ const questoes = [{
   resposta: 'C',
 }]
 
-function criaAbertura() {
-  const abertura = {
-    spriteX: 0,
-    spriteY: 0,
-    largura: 320,
-    altura: 480,
-    x: 0,
-    y: 0,
-    recorde: 0,
-    iniciado: false,
-    click() {
-      somSpaco.pause();
-      video.play()
-      if (abertura.iniciado) {
-        video.pause()
-        somSpaco.play()
-        video.currentTime = 100
-      }
-      abertura.iniciado = true
-    },
+const criaVideoIntroducao = (fonte = './introducao.mp4') => {
+  const somEspaco = new Audio()
+  somEspaco.src = './efeitos/spaco.wav'
+  somEspaco.loop = true
 
-    desenha() {
-      contexto.font = 'normal bold 20px serif'
-      contexto.fillStyle = "red"
-
-      if (!abertura.iniciado) {
-        contexto.drawImage(daniel, 0, 0)
-        contexto.fillText('Para Começar, clique na Tela', 10, 470)
-      }
-      else {
-        contexto.drawImage(video, 0, 0)
-        contexto.fillText('Introdução', 105, 30)
-        contexto.fillText('Clique para pular', 150, 470)
-      }
-    },
+  const video = document.createElement("video");
+  video.src = fonte
+  video.autoplay = true
+  video.loop = false
+  video.muted = false
+  video.addEventListener('ended', evento => mudaParaTela(Telas.JOGO))
+  const parar = () => {
+    video.pause()
+    video.currentTime = 100
+    somEspaco.play()
   }
-  return abertura
+  const iniciar = () => {
+    somEspaco.pause()
+    video.play()
+  }
+
+  return {
+    iniciar,
+    parar,
+    video
+  }
 }
 
-// [Plano de Fundo]
+const videoIntroducao = criaVideoIntroducao()
+
+const criaAbertura = (contexto, videoIntroducao) => {
+  let recorde = 0, iniciado = false
+  const spriteX = 0,
+    spriteY = 0,
+    largura = 320,
+    altura = 480,
+    x = 0,
+    y = 0
+
+  const click = () => {
+    videoIntroducao.iniciar()
+    if (iniciado) {
+      videoIntroducao.parar()
+    }
+    iniciado = true
+  }
+
+  const desenha = () => {
+    contexto.font = 'normal bold 20px serif'
+    contexto.fillStyle = "red"
+
+    if (!iniciado) {
+      contexto.drawImage(daniel, 0, 0)
+      contexto.fillText('Para Começar, clique na Tela', 10, 470)
+    }
+    else {
+      contexto.drawImage(videoIntroducao.video, 0, 0)
+      contexto.fillText('Introdução', 105, 30)
+      contexto.fillText('Clique para pular', 150, 470)
+    }
+  }
+  return {
+    click,
+    desenha
+  }
+}
+
 const planoDeFundo = {
   spriteX: 390,
   spriteY: 0,
@@ -311,7 +329,7 @@ function criaPlanetario() {
     atualiza() {
       const passou200Frames = frames % 200 === 0
       if (passou200Frames) {
-        console.log('Passou 200 frames')
+        // console.log('Passou 200 frames')
         planetario.planetas.push({
           x: canvas.width,
           y: Math.floor(Math.random() * 350),
@@ -389,14 +407,12 @@ function criaPrincipe() {
     gravidade: 0.25,
     velocidade: 0,
     atualiza() {
-      if (fazColisao(principe, globais.sol)) {
+      if (principe.fazColisao(globais.sol)) {
         console.log('Fez colisao')
         planoDeFundo.recorde = 0
         somGrito.play()
 
-        setTimeout(() => {
-          mudaParaTela(Telas.INICIO)
-        }, 500)
+        mudaParaTela(Telas.INICIO)
         return
       }
 
@@ -432,6 +448,17 @@ function criaPrincipe() {
         principe.frameAtual = incremento % baseRepeticao
       }
     },
+    fazColisao(sol) {
+      const principeY = principe.y + principe.altura
+      const solY = sol.y
+      const coroaSolar = 100
+
+      if (principeY >= solY + coroaSolar) {
+        return true
+      }
+
+      return false
+    },
     desenha() {
       principe.atualizaOFrameAtual()
       const { spriteX, spriteY } = principe.movimentos[principe.frameAtual]
@@ -448,11 +475,6 @@ function criaPrincipe() {
   return principe
 }
 
-// 
-// [Telas]
-// 
-const globais = {}
-let telaAtiva = {}
 function mudaParaTela(novaTela) {
   telaAtiva = novaTela
 
@@ -464,12 +486,12 @@ function mudaParaTela(novaTela) {
 const Telas = {
   INICIO: {
     inicializa() {
-      somSpaco.play()
+      // console.log('TELA_INICIO-INICIALIZA')
       globais.sol = criaSol()
       globais.principe = criaPrincipe()
       globais.planetario = criaPlanetario()
       globais.pergunta = criaPergunta()
-      globais.abertura = criaAbertura()
+      globais.abertura = criaAbertura(contexto, videoIntroducao)
     },
     desenha() {
       planoDeFundo.desenha()
@@ -518,18 +540,6 @@ Telas.JOGO = {
   }
 }
 
-function fazColisao(principe, sol) {
-  const principeY = principe.y + principe.altura
-  const solY = sol.y
-  const coroaSolar = 100
-
-  if (principeY >= solY + coroaSolar) {
-    return true
-  }
-
-  return false
-}
-
 function loop() {
 
   telaAtiva.desenha()
@@ -539,26 +549,27 @@ function loop() {
   requestAnimationFrame(loop)
 }
 
-const listenerClick = evento => {
+const reageACliques = evento => {
   if (telaAtiva.click) {
     telaAtiva.click(evento)
   }
 };
-const listenerKeyDown = (evento) => {
-  const isSpace = evento.code === 'Space';
-  const isArrowUp = evento.code === 'ArrowUp';
-  const fireJump = isSpace || isArrowUp;
-  if (fireJump) {
+const reageATeclaEspacoOuSetaParaCima = (evento) => {
+  const espacoPressionado = evento.code === 'Space';
+  const setaParaCimaPressionada = evento.code === 'ArrowUp';
+  const pula = espacoPressionado || setaParaCimaPressionada;
+  if (pula) {
     evento.preventDefault();
     evento.stopPropagation();
     telaAtiva.click();
   }
 }
 
+const iniciar = () => {
+  window.addEventListener('click', reageACliques);
+  window.addEventListener('keydown', reageATeclaEspacoOuSetaParaCima);
+  mudaParaTela(Telas.INICIO)
+  loop()
+}
 
-window.addEventListener('click', listenerClick);
-window.addEventListener('keydown', listenerKeyDown);
-
-
-mudaParaTela(Telas.INICIO)
-loop()
+window.PequenoPrincipe = iniciar
