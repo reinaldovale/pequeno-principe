@@ -1,3 +1,17 @@
+const questoes = [{
+  pergunta: "Pegunta de número UM ",
+  alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
+  resposta: 'A',
+}, {
+  pergunta: "Pegunta de número DOIS ",
+  alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
+  resposta: 'B',
+}, {
+  pergunta: "Pegunta de número TRÊS ",
+  alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
+  resposta: 'C',
+}]
+
 const canvas = document.querySelector('canvas')
 const contexto = canvas.getContext('2d')
 
@@ -17,27 +31,38 @@ somPonto.src = './efeitos/ponto.wav'
 const somErro = new Audio()
 somErro.src = './efeitos/erro.wav'
 
+const somEspaco = new Audio()
+somEspaco.src = './efeitos/spaco.wav'
+somEspaco.loop = true
+
 const sprites = new Image()
-sprites.src = './sprites.png'
+sprites.src = './midia/sprites.png'
 
-const daniel = new Image()
-daniel.src = './daniel.png'
+const criaVideoFinalizacao = (fonte = './midia/finalizacao.mp4') => {
+  const video = document.createElement("video");
+  video.src = fonte
+  video.autoplay = true
+  video.loop = true
+  video.muted = false
+  // video.addEventListener('ended', evento => mudaParaTela(Telas.JOGO))
+  const parar = () => {
+    video.pause()
+    video.currentTime = 100
+    somEspaco.play()
+  }
+  const iniciar = () => {
+    somEspaco.pause()
+    video.play()
+  }
 
-const questoes = [{
-  pergunta: "Pegunta de número UM ",
-  alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
-  resposta: 'A',
-}, {
-  pergunta: "Pegunta de número DOIS ",
-  alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
-  resposta: 'B',
-}, {
-  pergunta: "Pegunta de número TRÊS ",
-  alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
-  resposta: 'C',
-}]
+  return {
+    iniciar,
+    parar,
+    video
+  }
+}
 
-const criaIntroducao = (fonte = './introducao.mp4') => {
+const criaIntroducao = (fonte = './midia/introducao.mp4') => {
   const somEspaco = new Audio()
   somEspaco.src = './efeitos/spaco.wav'
   somEspaco.loop = true
@@ -65,21 +90,42 @@ const criaIntroducao = (fonte = './introducao.mp4') => {
   }
 }
 
-const introducao = criaIntroducao()
+const videoIntroducao = criaIntroducao()
+const videoFinalizacao = criaVideoFinalizacao()
 
-const criaAbertura = (contexto, introducao) => {
-  let recorde = 0, iniciado = false
-  const spriteX = 0,
-    spriteY = 0,
-    largura = 320,
-    altura = 480,
-    x = 0,
-    y = 0
+const criaAbertura = (contexto, videoIntroducao) => {
+  let iniciado = false
+  const titulo = {
+    spriteX: 0,
+    spriteY: 0,
+    largura: 320,
+    altura: 70,
+    x: 0,
+    y: 10
+  }
+
+  const daniel = {
+    spriteX: 0,
+    spriteY: 80,
+    largura: 320,
+    altura: 154,
+    x: 0,
+    y: 127
+  }
+
+  const pequenoPrincipe = {
+    spriteX: 0,
+    spriteY: 245,
+    largura: 320,
+    altura: 232,
+    x: 0,
+    y: 480 - 232
+  }
 
   const click = () => {
-    introducao.iniciar()
+    videoIntroducao.iniciar()
     if (iniciado) {
-      introducao.parar()
+      videoIntroducao.parar()
     }
     iniciado = true
   }
@@ -89,14 +135,38 @@ const criaAbertura = (contexto, introducao) => {
     contexto.fillStyle = "red"
 
     if (!iniciado) {
-      contexto.drawImage(daniel, 0, 0)
+      contexto.drawImage(sprites, titulo.spriteX, titulo.spriteY, titulo.largura, titulo.altura, titulo.x, titulo.y, titulo.largura, titulo.altura)
+      contexto.drawImage(sprites, pequenoPrincipe.spriteX, pequenoPrincipe.spriteY, pequenoPrincipe.largura, pequenoPrincipe.altura, pequenoPrincipe.x, pequenoPrincipe.y, pequenoPrincipe.largura, pequenoPrincipe.altura)
+      contexto.drawImage(sprites, daniel.spriteX, daniel.spriteY, daniel.largura, daniel.altura, daniel.x, daniel.y, daniel.largura, daniel.altura)
       contexto.fillText('Para Começar, clique na Tela', 10, 470)
     }
     else {
-      contexto.drawImage(introducao.video, 0, 0)
+      contexto.drawImage(videoIntroducao.video, 0, 0)
       contexto.fillText('Introdução', 105, 30)
       contexto.fillText('Clique para pular', 150, 470)
     }
+  }
+  return {
+    click,
+    desenha
+  }
+}
+
+const criaFinalizacao = (contexto, videoFinalizacao) => {
+
+  const click = () => {
+    planoDeFundo.recorde = 0
+    videoFinalizacao.parar()
+    mudaParaTela(Telas.INICIO)
+  }
+
+  const desenha = () => {
+    contexto.font = 'normal bold 20px serif'
+    contexto.fillStyle = "red"
+    contexto.drawImage(videoFinalizacao.video, 0, 0)
+    contexto.fillText('Para Reiniciar, clique na Tela', 10, 470)
+
+    planoDeFundo.desenhaPontos(contexto)
   }
   return {
     click,
@@ -139,13 +209,18 @@ const planoDeFundo = {
       planoDeFundo.largura, planoDeFundo.altura,
     )
 
+    if (planoDeFundo.recorde > 0) {
+      planoDeFundo.desenhaPontos(contexto)
+    }
+  },
+  desenhaPontos(contexto) {
     contexto.font = 'normal normal 20px serif'
     contexto.fillStyle = "white"
     contexto.fillText("Pontos: ", 200, 20)
     contexto.font = 'normal bold 30px serif'
     contexto.fillStyle = "red"
     contexto.fillText(planoDeFundo.recorde.toString().padStart(3, '0'), 270, 25)
-  },
+  }
 }
 
 function criaSol() {
@@ -204,13 +279,29 @@ function criaSol() {
 }
 
 function criaPergunta() {
+  const principeSentado = {
+    spriteX: 0,
+    spriteY: 482,
+    largura: 320,
+    altura: 155,
+    x: 0,
+    y: 480 - 155,
+  }
+  const daniel = {
+    spriteX: 0,
+    spriteY: 80,
+    largura: 320,
+    altura: 154,
+    x: 0,
+    y: 0
+  }
   const pergunta = {
-    spriteX: 130,
-    spriteY: 152,
-    largura: 225,
-    altura: 151,
-    x: 50,
-    y: 20,
+    spriteX: 1194,
+    spriteY: 385,
+    largura: 320,
+    altura: 284,
+    x: 0,
+    y: 120,
     botaoA: document.querySelector('#botaoA'),
     botaoB: document.querySelector('#botaoB'),
     botaoC: document.querySelector('#botaoC'),
@@ -225,7 +316,7 @@ function criaPergunta() {
       pergunta.botaoB.style.display = 'none'
       pergunta.botaoC.style.display = 'none'
     },
-    click({ target: { tagName, value } }) {
+    click({ target: { tagName, value } } = { target: '', value: '' }) {
       if (!/BUTTON/.test(tagName)) {
         return
       }
@@ -247,25 +338,30 @@ function criaPergunta() {
     atualiza() {
     },
     desenha() {
+      contexto.drawImage(sprites, pergunta.spriteX, pergunta.spriteY, pergunta.largura, pergunta.altura, pergunta.x, pergunta.y, pergunta.largura, pergunta.altura)
+      contexto.drawImage(sprites, daniel.spriteX, daniel.spriteY, daniel.largura, daniel.altura, daniel.x, daniel.y, daniel.largura, daniel.altura)
+
+
       contexto.drawImage(
         sprites,
-        pergunta.spriteX, pergunta.spriteY,
-        pergunta.largura, pergunta.altura,
-        pergunta.x, pergunta.y,
-        pergunta.largura, pergunta.altura,
+        principeSentado.spriteX, principeSentado.spriteY,
+        principeSentado.largura, principeSentado.altura,
+        principeSentado.x, principeSentado.y,
+        principeSentado.largura, principeSentado.altura,
       )
+
       if (Object.keys(pergunta.questao).length === 0) {
         pergunta.questao = questoes[Math.floor(Math.random() * questoes.length)]
       }
 
       // contexto.textAlign = "center"
       contexto.font = 'normal bold 18px serif'
-      contexto.fillText(pergunta.questao.pergunta, 65, 90)
+      contexto.fillText(pergunta.questao.pergunta, 50, 170)
       contexto.font = '14px serif'
       const [altA, altB, altC] = pergunta.questao.alternativas.split("; ")
-      contexto.fillText(altA, 60, 130)
-      contexto.fillText(altB, 60, 145)
-      contexto.fillText(altC, 60, 160)
+      contexto.fillText(altA, 40, 260)
+      contexto.fillText(altB, 40, 280)
+      contexto.fillText(altC, 40, 300)
 
       pergunta.exibirBotoes()
 
@@ -347,8 +443,7 @@ function criaPlanetario() {
         if (planetario.temColisaoComOPrincipe(planeta)) {
           console.log('Você perdeu!')
           somGrito.play()
-          planoDeFundo.recorde = 0
-          mudaParaTela(Telas.INICIO)
+          mudaParaTela(Telas.FIM)
         }
 
         if (planeta.x + planetario.largura <= 0) {
@@ -406,13 +501,21 @@ function criaPrincipe() {
     },
     gravidade: 0.25,
     velocidade: 0,
-    atualiza() {
+    momentoColisao: 0,
+    espera: 1000, //1 segundo
+    atualiza(timestamp) {
       if (principe.fazColisao(globais.sol)) {
         console.log('Fez colisao')
-        planoDeFundo.recorde = 0
         somGrito.play()
+        let { momentoColisao, espera } = principe
+        if (momentoColisao === 0) {
+          principe.momentoColisao = momentoColisao = timestamp
+        }
 
-        mudaParaTela(Telas.INICIO)
+        const delta = timestamp - momentoColisao
+        if (delta > espera) {
+          mudaParaTela(Telas.FIM)
+        }
         return
       }
 
@@ -486,12 +589,11 @@ function mudaParaTela(novaTela) {
 const Telas = {
   INICIO: {
     inicializa() {
-      // console.log('TELA_INICIO-INICIALIZA')
       globais.sol = criaSol()
       globais.principe = criaPrincipe()
       globais.planetario = criaPlanetario()
       globais.pergunta = criaPergunta()
-      globais.abertura = criaAbertura(contexto, introducao)
+      globais.abertura = criaAbertura(contexto, videoIntroducao)
     },
     desenha() {
       planoDeFundo.desenha()
@@ -506,11 +608,30 @@ const Telas = {
   }
 }
 
+Telas.FIM = {
+  inicializa() {
+    globais.sol = criaSol()
+    globais.principe = criaPrincipe()
+    globais.finalizacao = criaFinalizacao(contexto, videoFinalizacao)
+    videoFinalizacao.iniciar()
+  },
+  desenha() {
+    planoDeFundo.desenha()
+    globais.finalizacao.desenha()
+  },
+  click() {
+    globais.finalizacao.click()
+  },
+  atualiza() {
+    planoDeFundo.atualiza()
+  }
+}
+
 Telas.PERGUNTA = {
   desenha() {
     planoDeFundo.desenha()
-    globais.sol.desenha()
-    globais.planetario.desenha()
+    // globais.sol.desenha()
+    // globais.planetario.desenha()
     // globais.principe.desenha()
     globais.pergunta.desenha()
   },
@@ -532,18 +653,17 @@ Telas.JOGO = {
   click() {
     globais.principe.pula()
   },
-  atualiza() {
+  atualiza(tempoAtual) {
     planoDeFundo.atualiza()
     globais.sol.atualiza()
     globais.planetario.atualiza()
-    globais.principe.atualiza()
+    globais.principe.atualiza(tempoAtual)
   }
 }
 
-function loop() {
-
-  telaAtiva.desenha()
-  telaAtiva.atualiza()
+function loop(timestamp) {
+  telaAtiva.desenha(timestamp)
+  telaAtiva.atualiza(timestamp)
 
   frames = frames + 1
   requestAnimationFrame(loop)
