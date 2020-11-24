@@ -1,28 +1,11 @@
-# Flappy Bird: Dev Soutinho 
+# O Pequeno Príncipe: Daniel Vale
 
-[![Série](https://img.shields.io/badge/DevSoutinho-Flappy%20Bird-orange)](https://www.youtube.com/watch?v=jOAU81jdi-c&list=PLTcmLKdIkOWmeNferJ292VYKBXydGeDej)
 [![licence mit](https://img.shields.io/badge/licence-MIT-blue.svg)](https://github.com/afonsopacifer/open-source-boilerplate/blob/master/LICENSE.md)
 
-- [Switch to 🇺🇸](./_docs/README_en-us.md)?
+> Jogo de perguntas e respostas baseado na obra O Pequeno Príncipe. \
+> Para pontuar no jogo, acerte a alternava correta para a pergunta que aparece quando o Pequeno Príncipe pousa sobre um planeta. \
+> Obs.: para um pouso bem sucedido, o príncipe precisa estar, exatamente, à cima do planeta, nem muito alto, nem muito baixo, nem muito a frente e nem muito a trás. \
+> [**DEMOSTRAÇÃO**](https://reinaldovale.github.io/pequeno-principe/)
 
-> Projeto da a [série de vídeos no YouTube no canal DevSoutinho](https://www.youtube.com/watch?v=jOAU81jdi-c&list=PLTcmLKdIkOWmeNferJ292VYKBXydGeDej) ensinando a fazer um jogo com JavaScript do ZERO!
-> 
-> Quer ver como ta ficando? Acessa a [**DEMO**](https://mariosouto.com/flappy-bird-devsoutinho/)
-
-<p align="center">
-  <img alt="Logo do projeto" src="./_docs/logo.png" />
-</p>
-
-## Contributing/Contribuir
-Quer contribuir com o projeto? [Confira o passo a passo](./CONTRIBUTING.md)
-Quer ver o que está por vir? [Acompanhe aqui](https://github.com/omariosouto/flappy-bird-devsoutinho/projects)
-
-## Versioning/Versionamento
-
-Esse projeto não possui um sistema de versionamento.
-
-## History/Histórico
-Da uma olhada na aba [Releases](https://github.com/omariosouto/flappy-bird-devsoutinho/releases) pra acompanhar as alterações feitas no projeto.
-
-## License/Licença do Projeto
-[MIT License](./LICENSE.md) © [Mario Souto](http://mariosouto.com/)
+- Inspirado em [Flappy Bird: Dev Soutinho](https://github.com/omariosouto/flappy-bird-devsoutinho) 
+- License/Licença do Projeto [MIT License](./LICENSE.md)

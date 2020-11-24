@@ -87,7 +87,7 @@ sprites.src = './midia/sprites.png'
 const criaVideoFinalizacao = (fonte = './midia/finalizacao.mp4') => {
   const video = document.createElement("video");
   video.src = fonte
-  video.autoplay = true
+  video.autoplay = false
   video.loop = true
   video.muted = false
   // video.addEventListener('ended', evento => mudaParaTela(Telas.JOGO))
@@ -115,7 +115,7 @@ const criaIntroducao = (fonte = './midia/introducao.mp4') => {
 
   const video = document.createElement("video");
   video.src = fonte
-  video.autoplay = true
+  video.autoplay = false
   video.loop = false
   video.muted = false
   video.addEventListener('ended', evento => mudaParaTela(Telas.JOGO))
@@ -406,7 +406,7 @@ function criaPergunta() {
       // contexto.textAlign = "center"
       contexto.fillStyle = "black"
       contexto.font = 'normal bold 18px serif'
-      const [parte1, parte2=''] = pergunta.questao.pergunta.split("# ")
+      const [parte1, parte2 = ''] = pergunta.questao.pergunta.split("# ")
       contexto.fillText(parte1, 40, 180)
       contexto.fillText(parte2, 45, 195)
 
