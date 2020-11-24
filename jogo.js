@@ -1,15 +1,61 @@
 const questoes = [{
-  pergunta: "Pegunta de número UM ",
-  alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
+  pergunta: 'Qual é o tema do jogo?',
+  alternativas: '(A) pequeno principe; (B) pequeno príncipe preto; (C) pinóquio',
   resposta: 'A',
+  pontos: 1
 }, {
-  pergunta: "Pegunta de número DOIS ",
-  alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
-  resposta: 'B',
-}, {
-  pergunta: "Pegunta de número TRÊS ",
-  alternativas: '(A) alternativa A; (B) alternativa B; (C) alternativa C',
+  pergunta: 'O que o pequeno príncipe # usou para voar?',
+  alternativas: '(A) borboleta; (B) nave espacial; (C) pássaro',
   resposta: 'C',
+  pontos: 1
+},
+{
+  pergunta: 'O que o pequeno príncipe pediu # por aviador para desenhar?',
+  alternativas: '(A) bode; (B) carneiro; (C) vaca',
+  resposta: 'B',
+  pontos: 5
+},
+{
+  pergunta: 'Onde o aviador conhece # pequeno príncipe?',
+  alternativas: '(A) no deserto; (B) em uma ilha; (C) na floresta',
+  resposta: 'A',
+  pontos: 10
+},
+{
+  pergunta: 'O 7° planeta que o pequeno # príncipe visitou... Foi?',
+  alternativas: '(A) empresário; (B) terra; (C) rei',
+  resposta: 'B',
+  pontos: 6
+},
+{
+  pergunta: 'Quem escreveu o livro: # O pequeno príncipe?',
+  alternativas: '(A) Rodrigo França; (B) Cecília Meireles; (C) Antoine de Saint-Exupéry',
+  resposta: 'C',
+  pontos: 20
+},
+{
+  pergunta: 'De quem era o primeiro planeta # que o pequeno príncipe visitou?',
+  alternativas: '(A) Empresário; (B) acendedor de lampiões; (C) nenhuma tá correto',
+  resposta: 'C',
+  pontos: 6
+},
+{
+  pergunta: 'Em que lugar do espaço # o pequeno príncipe mora?',
+  alternativas: '(A) no sol; (B) asteroide; (C) em um planeta',
+  resposta: 'B',
+  pontos: 7
+},
+{
+  pergunta: 'O Aviador tentou # consertar o motor?',
+  alternativas: '(A) sim; (B) não; (C) nenhuma tá correto',
+  resposta: 'A',
+  pontos: 20
+},
+{
+  pergunta: 'A Rosa foi egoísta # com Pequeno Príncipe?',
+  alternativas: '(A) não; (B) sim; (C) nenhuma tá correto',
+  resposta: 'B',
+  pontos: 10
 }]
 
 const canvas = document.querySelector('canvas')
@@ -132,7 +178,7 @@ const criaAbertura = (contexto, videoIntroducao) => {
 
   const desenha = () => {
     contexto.font = 'normal bold 20px serif'
-    contexto.fillStyle = "red"
+    contexto.fillStyle = "blue"
 
     if (!iniciado) {
       contexto.drawImage(sprites, titulo.spriteX, titulo.spriteY, titulo.largura, titulo.altura, titulo.x, titulo.y, titulo.largura, titulo.altura)
@@ -324,9 +370,12 @@ function criaPergunta() {
       if (value === pergunta.questao.resposta) {
         console.log("Você ganhou 10 pontos!");
         somPonto.play()
-        planoDeFundo.recorde += 10;
+        planoDeFundo.recorde += pergunta.questao.pontos;
       }
       else {
+        planoDeFundo.recorde = planoDeFundo.recorde > 2
+          ? planoDeFundo.recorde - 3
+          : 0
         somErro.play()
       }
 
@@ -355,13 +404,20 @@ function criaPergunta() {
       }
 
       // contexto.textAlign = "center"
+      contexto.fillStyle = "black"
       contexto.font = 'normal bold 18px serif'
-      contexto.fillText(pergunta.questao.pergunta, 50, 170)
+      const [parte1, parte2=''] = pergunta.questao.pergunta.split("# ")
+      contexto.fillText(parte1, 40, 180)
+      contexto.fillText(parte2, 45, 195)
+
       contexto.font = '14px serif'
       const [altA, altB, altC] = pergunta.questao.alternativas.split("; ")
-      contexto.fillText(altA, 40, 260)
-      contexto.fillText(altB, 40, 280)
-      contexto.fillText(altC, 40, 300)
+      contexto.fillText(altA, 40, 230)
+      contexto.fillText(altB, 40, 250)
+      contexto.fillText(altC, 40, 270)
+
+      contexto.fillStyle = "red"
+      contexto.fillText('*Vale: ' + pergunta.questao.pontos + ' pontos', 5, 310)
 
       pergunta.exibirBotoes()
 
