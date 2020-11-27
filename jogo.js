@@ -1,145 +1,81 @@
-const questoes = [{
-  pergunta: 'Qual é o tema do jogo?',
-  alternativas: '(A) pequeno principe; (B) pequeno príncipe preto; (C) pinóquio',
-  resposta: 'A',
-  pontos: 1
-}, {
-  pergunta: 'O que o pequeno príncipe # usou para voar?',
-  alternativas: '(A) borboleta; (B) nave espacial; (C) pássaro',
-  resposta: 'C',
-  pontos: 1
-},
-{
-  pergunta: 'O que o pequeno príncipe pediu # por aviador para desenhar?',
-  alternativas: '(A) bode; (B) carneiro; (C) vaca',
-  resposta: 'B',
-  pontos: 5
-},
-{
-  pergunta: 'Onde o aviador conhece # pequeno príncipe?',
-  alternativas: '(A) no deserto; (B) em uma ilha; (C) na floresta',
-  resposta: 'A',
-  pontos: 10
-},
-{
-  pergunta: 'O 7° planeta que o pequeno # príncipe visitou... Foi?',
-  alternativas: '(A) empresário; (B) terra; (C) rei',
-  resposta: 'B',
-  pontos: 6
-},
-{
-  pergunta: 'Quem escreveu o livro: # O pequeno príncipe?',
-  alternativas: '(A) Rodrigo França; (B) Cecília Meireles; (C) Antoine de Saint-Exupéry',
-  resposta: 'C',
-  pontos: 20
-},
-{
-  pergunta: 'De quem era o primeiro planeta # que o pequeno príncipe visitou?',
-  alternativas: '(A) Empresário; (B) acendedor de lampiões; (C) nenhuma tá correto',
-  resposta: 'C',
-  pontos: 6
-},
-{
-  pergunta: 'Em que lugar do espaço # o pequeno príncipe mora?',
-  alternativas: '(A) no sol; (B) asteroide; (C) em um planeta',
-  resposta: 'B',
-  pontos: 7
-},
-{
-  pergunta: 'O Aviador tentou # consertar o motor?',
-  alternativas: '(A) sim; (B) não; (C) nenhuma tá correto',
-  resposta: 'A',
-  pontos: 20
-},
-{
-  pergunta: 'A Rosa foi egoísta # com Pequeno Príncipe?',
-  alternativas: '(A) não; (B) sim; (C) nenhuma tá correto',
-  resposta: 'B',
-  pontos: 10
-}]
+import questoes from './questoes.js';
 
-const canvas = document.querySelector('canvas')
-const contexto = canvas.getContext('2d')
+const JOGO = {
+  videos: {
+    introducao: {},
+    finalizacao: {},
+  },
+  sons: {
+    grito: {},
+    asas: {},
+    pulo: {},
+    ponto: {},
+    espaco: {},
+    erro: {}
+  },
+  imagens: {},
+  canvas: {},
+  contexto: {},
+  frames: 0
+};
 
-const globais = {}
-let telaAtiva = {}
-let frames = 0
+JOGO.sons.grito = new Audio()
+JOGO.sons.grito.src = './efeitos/grito.wav'
 
-const somGrito = new Audio()
-somGrito.src = './efeitos/grito.wav'
+JOGO.sons.asas = new Audio()
+JOGO.sons.asas.src = './efeitos/pulo.wav'
 
-const somAsas = new Audio()
-somAsas.src = './efeitos/pulo.wav'
+JOGO.sons.ponto = new Audio()
+JOGO.sons.ponto.src = './efeitos/ponto.wav'
 
-const somPonto = new Audio()
-somPonto.src = './efeitos/ponto.wav'
+JOGO.sons.erro = new Audio()
+JOGO.sons.erro.src = './efeitos/erro.wav'
 
-const somErro = new Audio()
-somErro.src = './efeitos/erro.wav'
+JOGO.sons.espaco = new Audio()
+JOGO.sons.espaco.src = './efeitos/spaco.wav'
 
-const somEspaco = new Audio()
-somEspaco.src = './efeitos/spaco.wav'
-somEspaco.loop = true
+JOGO.imagens.sprites = new Image()
+JOGO.imagens.sprites.src = './midia/sprites.png'
 
-const sprites = new Image()
-sprites.src = './midia/sprites.png'
-
-const criaVideoFinalizacao = (fonte = './midia/finalizacao.mp4') => {
-  const video = document.createElement("video");
-  video.src = fonte
-  video.autoplay = false
-  video.loop = true
-  video.muted = false
-  // video.addEventListener('ended', evento => mudaParaTela(Telas.JOGO))
-  const parar = () => {
-    video.pause()
-    video.currentTime = 100
-    somEspaco.play()
-  }
-  const iniciar = () => {
-    somEspaco.pause()
-    video.play()
-  }
-
-  return {
-    iniciar,
-    parar,
-    video
-  }
+JOGO.videos.finalizacao = document.createElement("video");
+JOGO.videos.finalizacao.src = './midia/finalizacao.mp4'
+JOGO.videos.finalizacao.loop = true
+JOGO.videos.finalizacao.parar = () => {
+  JOGO.videos.finalizacao.pause()
+  // JOGO.videos.finalizacao.currentTime = 100
+  JOGO.sons.espaco.play()
+}
+JOGO.videos.finalizacao.iniciar = () => {
+  JOGO.sons.espaco.pause()
+  JOGO.videos.finalizacao.play()
 }
 
-const criaIntroducao = (fonte = './midia/introducao.mp4') => {
-  const somEspaco = new Audio()
-  somEspaco.src = './efeitos/spaco.wav'
-  somEspaco.loop = true
+JOGO.videos.introducao = document.createElement("video");
+JOGO.videos.introducao.src = './midia/introducao.mp4'
+JOGO.videos.introducao.loop = false
+JOGO.videos.introducao.parar = () => {
+  const iniciado = !JOGO.videos.introducao.paused;
+  JOGO.videos.introducao.currentTime = 100.0; // Optional -- can be left out for pause
+  // JOGO.videos.introducao.pause();
 
-  const video = document.createElement("video");
-  video.src = fonte
-  video.autoplay = false
-  video.loop = false
-  video.muted = false
-  video.addEventListener('ended', evento => mudaParaTela(Telas.JOGO))
-  const parar = () => {
-    video.pause()
-    video.currentTime = 100
-    somEspaco.play()
-  }
-  const iniciar = () => {
-    somEspaco.pause()
-    video.play()
-  }
+  // if (iniciado) { // This prevents the browser from trying to load the entire source
+  // JOGO.videos.introducao.load();
+  // }
 
-  return {
-    iniciar,
-    parar,
-    video
-  }
+
+  // JOGO.videos.introducao.pause()
+  // JOGO.videos.introducao.currentTime = 100
+  // JOGO.sons.espaco.play()
 }
 
-const videoIntroducao = criaIntroducao()
-const videoFinalizacao = criaVideoFinalizacao()
+JOGO.videos.introducao.addEventListener('pause', JOGO.videos.introducao.parar)
+JOGO.videos.introducao.iniciar = () => {
+  JOGO.sons.espaco.pause()
+  JOGO.videos.introducao.play()
+}
+JOGO.videos.introducao.addEventListener('ended', () => JOGO.mudaParaTela(JOGO.telas.ESPACO))
 
-const criaAbertura = (contexto, videoIntroducao) => {
+JOGO.criaAbertura = ({ contexto, imagens: { sprites }, videos: { introducao } }) => {
   let iniciado = false
   const titulo = {
     spriteX: 0,
@@ -169,9 +105,9 @@ const criaAbertura = (contexto, videoIntroducao) => {
   }
 
   const click = () => {
-    videoIntroducao.iniciar()
+    introducao.iniciar()
     if (iniciado) {
-      videoIntroducao.parar()
+      introducao.pause()
     }
     iniciado = true
   }
@@ -187,7 +123,7 @@ const criaAbertura = (contexto, videoIntroducao) => {
       contexto.fillText('Para Começar, clique na Tela', 10, 470)
     }
     else {
-      contexto.drawImage(videoIntroducao.video, 0, 0)
+      contexto.drawImage(introducao, 0, 0)
       contexto.fillText('Introdução', 105, 30)
       contexto.fillText('Clique para pular', 150, 470)
     }
@@ -198,21 +134,21 @@ const criaAbertura = (contexto, videoIntroducao) => {
   }
 }
 
-const criaFinalizacao = (contexto, videoFinalizacao) => {
+JOGO.criaFinalizacao = ({ contexto, videos: { finalizacao }, planoDeFundo, telas, mudaParaTela }) => {
 
   const click = () => {
     planoDeFundo.recorde = 0
-    videoFinalizacao.parar()
-    mudaParaTela(Telas.INICIO)
+    finalizacao.parar()
+    mudaParaTela(telas.INICIO)
   }
 
   const desenha = () => {
     contexto.font = 'normal bold 20px serif'
     contexto.fillStyle = "red"
-    contexto.drawImage(videoFinalizacao.video, 0, 0)
+    contexto.drawImage(finalizacao, 0, 0)
     contexto.fillText('Para Reiniciar, clique na Tela', 10, 470)
 
-    planoDeFundo.desenhaPontos(contexto)
+    planoDeFundo.desenhaPontos()
   }
   return {
     click,
@@ -220,22 +156,48 @@ const criaFinalizacao = (contexto, videoFinalizacao) => {
   }
 }
 
-const planoDeFundo = {
-  spriteX: 390,
-  spriteY: 0,
-  largura: 320,
-  altura: 480,
-  x: 0,
-  y: 0,
-  recorde: 0,
-  atualiza() {
+JOGO.criaPlanoDeFundo = ({ contexto, imagens: { sprites }, sons: { erro, ponto }, canvas }) => {
+  const planoDeFundo = {
+    spriteX: 390,
+    spriteY: 0,
+    largura: 320,
+    altura: 480,
+    x: 0,
+    y: 0,
+    recorde: 0
+  }
+  const atualizaRecorde = (pontuou, pontos) => {
+    if (pontuou) {
+      console.log(`Você ganhou ${pontos} pontos!`);
+      ponto.play()
+      planoDeFundo.recorde += pontos
+      return
+    }
+
+    erro.play()
+
+    if (planoDeFundo.recorde > 2) {
+      planoDeFundo.recorde -= 3
+      return
+    }
+    planoDeFundo.recorde = 0
+  }
+  const desenhaPontos = () => {
+    contexto.font = 'normal normal 20px serif'
+    contexto.fillStyle = "white"
+    contexto.fillText("Pontos: ", 200, 20)
+    contexto.font = 'normal bold 30px serif'
+    contexto.fillStyle = "red"
+    contexto.fillText(planoDeFundo.recorde.toString().padStart(3, '0'), 270, 25)
+  }
+  const atualiza = () => {
     const movimentoDoFundo = 0.2
     const repeteEm = planoDeFundo.largura
     const movimentacao = planoDeFundo.x - movimentoDoFundo
 
     planoDeFundo.x = movimentacao % repeteEm
-  },
-  desenha() {
+  }
+  const desenha = () => {
     contexto.fillStyle = '#000407'
     contexto.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -256,20 +218,18 @@ const planoDeFundo = {
     )
 
     if (planoDeFundo.recorde > 0) {
-      planoDeFundo.desenhaPontos(contexto)
+      desenhaPontos()
     }
-  },
-  desenhaPontos(contexto) {
-    contexto.font = 'normal normal 20px serif'
-    contexto.fillStyle = "white"
-    contexto.fillText("Pontos: ", 200, 20)
-    contexto.font = 'normal bold 30px serif'
-    contexto.fillStyle = "red"
-    contexto.fillText(planoDeFundo.recorde.toString().padStart(3, '0'), 270, 25)
+  }
+  return {
+    atualiza,
+    desenha,
+    desenhaPontos,
+    atualizaRecorde
   }
 }
 
-function criaSol() {
+JOGO.criaSol = ({ contexto, imagens: { sprites }, canvas }) => {
   const sol = {
     spriteX: 0,
     spriteY: 758,
@@ -297,7 +257,7 @@ function criaSol() {
       { spriteX: 1280, spriteY: 998, },
     ],
     frameAtual: 0,
-    atualizaOFrameAtual() {
+    atualizaOFrameAtual(frames) {
       const intervaloDeFrames = 20
       const passouOIntervalo = frames % intervaloDeFrames === 0
 
@@ -308,8 +268,8 @@ function criaSol() {
         sol.frameAtual = incremento % baseRepeticao
       }
     },
-    desenha() {
-      sol.atualizaOFrameAtual()
+    desenha(frames) {
+      sol.atualizaOFrameAtual(frames)
       const { spriteX, spriteY } = sol.movimentos[sol.frameAtual]
 
       contexto.drawImage(
@@ -324,7 +284,7 @@ function criaSol() {
   return sol
 }
 
-function criaPergunta() {
+JOGO.criaPergunta = ({ contexto, imagens: { sprites }, principe, telas, mudaParaTela, planoDeFundo }) => {
   const principeSentado = {
     spriteX: 0,
     spriteY: 482,
@@ -367,24 +327,14 @@ function criaPergunta() {
         return
       }
 
-      if (value === pergunta.questao.resposta) {
-        console.log("Você ganhou 10 pontos!");
-        somPonto.play()
-        planoDeFundo.recorde += pergunta.questao.pontos;
-      }
-      else {
-        planoDeFundo.recorde = planoDeFundo.recorde > 2
-          ? planoDeFundo.recorde - 3
-          : 0
-        somErro.play()
-      }
+      const { resposta, pontos } = pergunta.questao
+      const acertou = (value === resposta)
+      planoDeFundo.atualizaRecorde(acertou, pontos);
 
       pergunta.questao = {}
-      globais.principe.y = -globais.principe.altura / 2
+      principe.y = -principe.altura / 2
       pergunta.esconderBotoes()
-      mudaParaTela(Telas.JOGO)
-    },
-    atualiza() {
+      mudaParaTela(telas.ESPACO)
     },
     desenha() {
       contexto.drawImage(sprites, pergunta.spriteX, pergunta.spriteY, pergunta.largura, pergunta.altura, pergunta.x, pergunta.y, pergunta.largura, pergunta.altura)
@@ -426,15 +376,15 @@ function criaPergunta() {
   return pergunta
 }
 
-function criaPlanetario() {
+JOGO.criaPlanetario = ({ contexto, imagens: { sprites }, principe, canvas, telas, sons: { grito }, mudaParaTela }) => {
   const planetario = {
     spriteX: 1159,
     spriteY: 0,
     largura: 117,
     altura: 117,
     planetas: [],
-    desenha() {
-      planetario.atualizaOFrameAtual()
+    desenha(frames) {
+      planetario.atualizaOFrameAtual(frames)
       const { spriteX, spriteY } = planetario.movimentos[planetario.frameAtual]
 
       planetario.planetas.forEach(function (planeta) {
@@ -458,9 +408,9 @@ function criaPlanetario() {
 
     },
     temColisaoComOPrincipe(planeta) {
-      const peDoPrincipe = globais.principe.y + globais.principe.altura
+      const peDoPrincipe = principe.y + principe.altura
 
-      if (globais.principe.x === planeta.x
+      if (principe.x === planeta.x
         && peDoPrincipe > planeta.y
         && peDoPrincipe < planeta.y + planetario.altura) {
         return true
@@ -468,17 +418,17 @@ function criaPlanetario() {
       return false
     },
     estaOPrincipeEmCondicoesDeEntrarNo(planeta) {
-      const peDoPrincipe = globais.principe.y + globais.principe.altura
+      const peDoPrincipe = principe.y + principe.altura
 
-      if (globais.principe.x > planeta.x
-        && globais.principe.x < planeta.x + (planetario.largura / 2)
+      if (principe.x > planeta.x
+        && principe.x < planeta.x + (planetario.largura / 2)
         && peDoPrincipe < planeta.y
         && (planeta.y - peDoPrincipe) < 3) {
         return true
       }
       return false
     },
-    atualiza() {
+    atualiza(frames) {
       const passou200Frames = frames % 200 === 0
       if (passou200Frames) {
         // console.log('Passou 200 frames')
@@ -493,13 +443,13 @@ function criaPlanetario() {
 
         if (planetario.estaOPrincipeEmCondicoesDeEntrarNo(planeta)) {
           console.log('Principe entrou no planeta')
-          mudaParaTela(Telas.PERGUNTA)
+          mudaParaTela(telas.PERGUNTA)
         }
 
         if (planetario.temColisaoComOPrincipe(planeta)) {
           console.log('Você perdeu!')
-          somGrito.play()
-          mudaParaTela(Telas.FIM)
+          grito.play()
+          mudaParaTela(telas.FIM)
         }
 
         if (planeta.x + planetario.largura <= 0) {
@@ -527,7 +477,7 @@ function criaPlanetario() {
 
     ],
     frameAtual: 0,
-    atualizaOFrameAtual() {
+    atualizaOFrameAtual(frames) {
       const intervaloDeFrames = 5
       const passouOIntervalo = frames % intervaloDeFrames === 0
 
@@ -542,7 +492,7 @@ function criaPlanetario() {
   return planetario
 }
 
-function criaPrincipe() {
+JOGO.criaPrincipe = ({ contexto, imagens: { sprites }, sol, sons: { grito, asas }, telas, mudaParaTela }) => {
   const principe = {
     spriteX: 735,
     spriteY: 0,
@@ -553,16 +503,16 @@ function criaPrincipe() {
     pulo: 4.6,
     pula() {
       principe.velocidade = - principe.pulo
-      somAsas.play()
+      asas.play()
     },
     gravidade: 0.25,
     velocidade: 0,
     momentoColisao: 0,
     espera: 1000, //1 segundo
     atualiza(timestamp) {
-      if (principe.fazColisao(globais.sol)) {
+      if (principe.fazColisao(sol)) {
         console.log('Fez colisao')
-        somGrito.play()
+        grito.play()
         let { momentoColisao, espera } = principe
         if (momentoColisao === 0) {
           principe.momentoColisao = momentoColisao = timestamp
@@ -570,7 +520,7 @@ function criaPrincipe() {
 
         const delta = timestamp - momentoColisao
         if (delta > espera) {
-          mudaParaTela(Telas.FIM)
+          mudaParaTela(telas.FIM)
         }
         return
       }
@@ -596,7 +546,7 @@ function criaPrincipe() {
       { spriteX: 1067, spriteY: 382, },
     ],
     frameAtual: 0,
-    atualizaOFrameAtual() {
+    atualizaOFrameAtual(frames) {
       const intervaloDeFrames = 10
       const passouOIntervalo = frames % intervaloDeFrames === 0
 
@@ -618,8 +568,8 @@ function criaPrincipe() {
 
       return false
     },
-    desenha() {
-      principe.atualizaOFrameAtual()
+    desenha(frames) {
+      principe.atualizaOFrameAtual(frames)
       const { spriteX, spriteY } = principe.movimentos[principe.frameAtual]
 
       contexto.drawImage(
@@ -634,118 +584,122 @@ function criaPrincipe() {
   return principe
 }
 
-function mudaParaTela(novaTela) {
-  telaAtiva = novaTela
+JOGO.mudaParaTela = (novaTela) => {
+  JOGO.telaAtiva = novaTela
 
-  if (telaAtiva.inicializa) {
-    telaAtiva.inicializa()
+  if (JOGO.telaAtiva.inicializa) {
+    JOGO.telaAtiva.inicializa()
   }
 }
 
-const Telas = {
+JOGO.telas = {
   INICIO: {
     inicializa() {
-      globais.sol = criaSol()
-      globais.principe = criaPrincipe()
-      globais.planetario = criaPlanetario()
-      globais.pergunta = criaPergunta()
-      globais.abertura = criaAbertura(contexto, videoIntroducao)
+      JOGO.planoDeFundo = JOGO.criaPlanoDeFundo(JOGO)
+      JOGO.sol = JOGO.criaSol(JOGO)
+      JOGO.principe = JOGO.criaPrincipe(JOGO)
+      JOGO.planetario = JOGO.criaPlanetario(JOGO)
+      JOGO.pergunta = JOGO.criaPergunta(JOGO)
+      JOGO.abertura = JOGO.criaAbertura(JOGO)
     },
     desenha() {
-      planoDeFundo.desenha()
-      globais.abertura.desenha()
+      JOGO.planoDeFundo.desenha()
+      JOGO.abertura.desenha()
     },
     click() {
-      globais.abertura.click()
+      JOGO.abertura.click()
     },
     atualiza() {
-      planoDeFundo.atualiza()
+      JOGO.planoDeFundo.atualiza()
+    }
+  },
+  FIM: {
+    inicializa() {
+      // JOGO.sol = criaSol()
+      // JOGO.principe = criaPrincipe()
+      JOGO.finalizacao = JOGO.criaFinalizacao(JOGO)
+      JOGO.videos.finalizacao.iniciar()
+    },
+    desenha(frames) {
+      // JOGO.planoDeFundo.desenha(frames)
+      JOGO.finalizacao.desenha()
+    },
+    click() {
+      JOGO.finalizacao.click()
+    },
+    atualiza(tempoAtual, frames) {
+      JOGO.planoDeFundo.atualiza(frames)
+    }
+  },
+  PERGUNTA: {
+    desenha(frames) {
+      JOGO.planoDeFundo.desenha(frames)
+      // JOGO.sol.desenha()
+      // JOGO.planetario.desenha()
+      // JOGO.principe.desenha()
+      JOGO.pergunta.desenha()
+    },
+    click(evento) {
+      JOGO.pergunta.click(evento)
+    },
+    atualiza(frames) {
+      // JOGO.pergunta.atualiza()
+      JOGO.planoDeFundo.atualiza(frames)
+    }
+  },
+  ESPACO: {
+    inicializa() {
+      JOGO.sons.espaco.play()
+    },
+    desenha(frames) {
+      JOGO.planoDeFundo.desenha(frames)
+      JOGO.sol.desenha(frames)
+      JOGO.planetario.desenha(frames)
+      JOGO.principe.desenha(frames)
+    },
+    click() {
+      JOGO.principe.pula()
+    },
+    atualiza(tempoAtual, frames) {
+      JOGO.planoDeFundo.atualiza(frames)
+      JOGO.sol.atualiza(frames)
+      JOGO.planetario.atualiza(frames)
+      JOGO.principe.atualiza(tempoAtual)
     }
   }
 }
 
-Telas.FIM = {
-  inicializa() {
-    globais.sol = criaSol()
-    globais.principe = criaPrincipe()
-    globais.finalizacao = criaFinalizacao(contexto, videoFinalizacao)
-    videoFinalizacao.iniciar()
-  },
-  desenha() {
-    planoDeFundo.desenha()
-    globais.finalizacao.desenha()
-  },
-  click() {
-    globais.finalizacao.click()
-  },
-  atualiza() {
-    planoDeFundo.atualiza()
-  }
+JOGO.loop = (timestamp) => {
+  JOGO.telaAtiva.desenha(JOGO.frames)
+  JOGO.telaAtiva.atualiza(timestamp, JOGO.frames)
+
+  JOGO.frames = JOGO.frames + 1
+  requestAnimationFrame(JOGO.loop)
 }
 
-Telas.PERGUNTA = {
-  desenha() {
-    planoDeFundo.desenha()
-    // globais.sol.desenha()
-    // globais.planetario.desenha()
-    // globais.principe.desenha()
-    globais.pergunta.desenha()
-  },
-  click(evento) {
-    globais.pergunta.click(evento)
-  },
-  atualiza() {
-    globais.pergunta.atualiza()
+JOGO.reageACliques = evento => {
+  if (JOGO.telaAtiva.click) {
+    JOGO.telaAtiva.click(evento)
   }
 }
-
-Telas.JOGO = {
-  desenha() {
-    planoDeFundo.desenha()
-    globais.sol.desenha()
-    globais.planetario.desenha()
-    globais.principe.desenha()
-  },
-  click() {
-    globais.principe.pula()
-  },
-  atualiza(tempoAtual) {
-    planoDeFundo.atualiza()
-    globais.sol.atualiza()
-    globais.planetario.atualiza()
-    globais.principe.atualiza(tempoAtual)
-  }
-}
-
-function loop(timestamp) {
-  telaAtiva.desenha(timestamp)
-  telaAtiva.atualiza(timestamp)
-
-  frames = frames + 1
-  requestAnimationFrame(loop)
-}
-
-const reageACliques = evento => {
-  if (telaAtiva.click) {
-    telaAtiva.click(evento)
-  }
-};
-const reageATeclaEspacoOuSetaParaCima = (evento) => {
+JOGO.reageATeclaEspacoOuSetaParaCima = evento => {
   const espacoPressionado = evento.code === 'Space';
   const setaParaCimaPressionada = evento.code === 'ArrowUp';
   const pula = espacoPressionado || setaParaCimaPressionada;
   if (pula) {
-    evento.preventDefault();
-    evento.stopPropagation();
-    telaAtiva.click();
+    JOGO.telaAtiva.click();
   }
 }
 
-const iniciar = () => {
-  window.addEventListener('click', reageACliques);
-  window.addEventListener('keydown', reageATeclaEspacoOuSetaParaCima);
-  mudaParaTela(Telas.INICIO)
-  loop()
+JOGO.iniciar = () => {
+  JOGO.conteiner = document.querySelector('#conteiner')
+  JOGO.canvas = JOGO.conteiner.querySelector('canvas')
+  JOGO.contexto = JOGO.canvas.getContext('2d')
+  JOGO.conteiner.addEventListener('click', JOGO.reageACliques);
+  window.addEventListener('keydown', JOGO.reageATeclaEspacoOuSetaParaCima);
+  JOGO.mudaParaTela(JOGO.telas.INICIO)
+  JOGO.loop()
 }
 
-window.PequenoPrincipe = iniciar
+window.addEventListener('DOMContentLoaded', () => JOGO.iniciar())
+

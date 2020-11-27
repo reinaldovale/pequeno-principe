@@ -4,11 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="./midia/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="./midia/favicon.ico" type="image/x-icon">
   <title>Pequeno Príncipe</title>
 </head>
 
-<body onload="window.PequenoPrincipe(document.querySelector('#root'));">
-  <div id="root" style="position:relative;width:320px;height:480px">
+<body>
+  <div id="conteiner" style="position:relative;width:320px;height:480px">
     <canvas id="game-canvas" width="320" height="480"></canvas>
     <button id="botaoA" value="A"
       style="position: absolute;left: 37px;top: 219px;width: 255px;display: none;height: 17px;opacity: 0.1;border: 0px;"></button>
@@ -32,7 +34,7 @@
     }
   </style>
 
-  <script src="./jogo.js"></script>
+  <script src="./jogo.js" type="module"></script>
 </body>
 
 </html>
